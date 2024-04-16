@@ -1,0 +1,12 @@
+POST http://localhost:3333/notification/push/register HTTP/1.1
+Content-Type: application/json
+
+{
+  "subscription": {
+    "endpoint": "endpoint_do_seu_dispositivo",
+    "keys": {
+      "p256dh": "sua_p256dh_key",
+      "auth": "sua_auth_key"
+    }
+  }
+}
