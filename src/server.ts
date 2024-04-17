@@ -10,7 +10,7 @@ app.use(cors());
 // WebPush
 console.log(WebPush.generateVAPIDKeys())
 const {publicKey,privateKey} = WebPush.generateVAPIDKeys()
-WebPush.setVapidDetails('https://backendevolutize.onrender.com', 'BGEdXoP2YqcLAewGyX-0TgdcHs49M4Rh-imwynwQRSjdzD56IR73grVXF21y7yjBjOZHVH9FX4B-jxzFpK7sR-0', 'h_bEvn9GOz_8b6zgo78VRcSWl8vtCDYZtX-fJ_mFOjk');
+WebPush.setVapidDetails('https://backendevolutize.onrender.com', publicKey, privateKey);
 
 
 
