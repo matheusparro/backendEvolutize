@@ -6,6 +6,16 @@ const app = express();
 
 app.use(express.json());
 app.use(cors());
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://frontevolutize.onrender.com');
+  // Você também pode especificar várias origens ou '*' para permitir qualquer origem
+  // res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  // Defina como true se precisar incluir cookies na solicitação
+  // res.setHeader('Access-Control-Allow-Credentials', true);
+  next();
+});
 
 // WebPush
 console.log(WebPush.generateVAPIDKeys())
