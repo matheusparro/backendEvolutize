@@ -9,10 +9,9 @@ app.use(cors());
 
 // WebPush
 
-const publicKey = 'BGL4bOMi4aRjGoBCyqL1aTzLUcqlVw_iPfuMdpivuYJsVkOzxA4hHoVTeIZ6nZpMvw2j84B985TS6h9LVsMfoVc';
-const privateKey = '_Muz8v4Ht9hCIBUgGncblTusRiJXUeLDx0U4Kw4Do94';
+const {publicKey,privateKey} = WebPush.generateVAPIDKeys()
+WebPush.setVapidDetails('https://backendevolutize.onrender.com', publicKey, privateKey);
 
-WebPush.setVapidDetails('https://localhost:3333', publicKey, privateKey);
 
 
 // Routes
