@@ -49,9 +49,8 @@ app.post('/notification/push/register', (request, response) => {
 });
 
 app.post('/notification/push/send', async (request, response) => {
-  const { subscription ,publickey } = request.body ;
-  console.log("AQUIIsubscription" + subscription)
-  console.log("AQUIIpublickey" + publickey)
+  const { subscription } = request.body as ISubscription;
+  console.log("AQUI A SUBSCRICACAO"+JSON.stringify(subscription))
   WebPush.sendNotification(
     subscription,
     JSON.stringify({
