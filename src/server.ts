@@ -44,7 +44,7 @@ app.get('/', (request, response) => {
 
 app.post('/notification/push/register', (request, response) => {
   console.log(request.body);
-
+  const { subscription } = request.body;
   return response.sendStatus(201);
 });
 
