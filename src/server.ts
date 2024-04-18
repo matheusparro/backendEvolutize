@@ -18,8 +18,6 @@ app.use((req, res, next) => {
 });
 
 // WebPush
-console.log(WebPush.generateVAPIDKeys())
-const {privateKey} = WebPush.generateVAPIDKeys()
 const publicKey = 'BBsXYqVS8EFi29zDPFD_uFUg11oaKBowNRqk-O-WqP3cmzzQOuSyCTUGUsStGtZFKEz8f2XYEx-mDawfhCg4hAM'
 WebPush.setVapidDetails('https://backendevolutize.onrender.com', 'BBsXYqVS8EFi29zDPFD_uFUg11oaKBowNRqk-O-WqP3cmzzQOuSyCTUGUsStGtZFKEz8f2XYEx-mDawfhCg4hAM', 'akUfQDG1egwhDbLFzg__48BYOSuV9kti4upgRKGX8KU');
 
@@ -51,8 +49,9 @@ app.post('/notification/push/register', (request, response) => {
 });
 
 app.post('/notification/push/send', async (request, response) => {
-  const { subscription } = request.body as ISubscription;
-
+  const { subscription ,publickey } = request.body ;
+  console.log("AQUIIsubscription" + subscription)
+  console.log("AQUIIpublickey" + publickey)
   WebPush.sendNotification(
     subscription,
     JSON.stringify({
