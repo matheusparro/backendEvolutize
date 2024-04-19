@@ -91,18 +91,18 @@ app.post('/notification/push/register', async (request, response) => {
 
 app.post('/notification/push/send', async (request, response) => {
   try {
-    // const user = await prisma.user.findUnique({
-    //   where:{
-    //     id:2
-    //   }
-    // }); // Consulta o primeiro usuário
+    const user = await prisma.user.findUnique({
+      where:{
+        id:2
+      }
+    }); // Consulta o primeiro usuário
 
-    // // Verifica se um usuário foi encontrado
-    // if (!user) {
-    //   throw new Error('Nenhum usuário encontrado.');
-    // }
+    // Verifica se um usuário foi encontrado
+    if (!user) {
+      throw new Error('Nenhum usuário encontrado.');
+    }
 
-    // // Constrói o objeto de subscription
+    // Constrói o objeto de subscription
     // const subscription = {
     //   endpoint: user.endpoint,
     //   keys: {
@@ -111,15 +111,15 @@ app.post('/notification/push/send', async (request, response) => {
     //   }
     // };
 
-    const subscription = {
+      const subscription = {
       
-      "endpoint":"https://web.push.apple.com/QIOV6iGU2FKwyHQae0CT-2VCnVvdLJWBLInx8IVPMxbgVfI5DSKLmvb5gHxF9y4_e-E5wfoKo_5d8Vtlcn26cpZ-lbRqQku6kJec-rcXYDpoiVc8odVncpenz9JKeCHskXhhH_e15HqjJxon8Q6quvM9c4zETVRDyg_SZppoGg8",
-      "keys":{
-         "p256dh":"BJfRvVeQu6JDO-WrbXavJgm-xyPsaWLqJNBZaUjcdKHDe_8fs8TCqdpMPs-LQNSN05r2AG3zSYAOyDWJuckzz6s",
-         "auth":"OgxebpQEu3j0eraIvYldXw"
-      }
-   
-  };
+        "endpoint":"https://web.push.apple.com/QIOV6iGU2FKwyHQae0CT-2VCnVvdLJWBLInx8IVPMxbgVfI5DSKLmvb5gHxF9y4_e-E5wfoKo_5d8Vtlcn26cpZ-lbRqQku6kJec-rcXYDpoiVc8odVncpenz9JKeCHskXhhH_e15HqjJxon8Q6quvM9c4zETVRDyg_SZppoGg8",
+        "keys":{
+           "p256dh":"BJfRvVeQu6JDO-WrbXavJgm-xyPsaWLqJNBZaUjcdKHDe_8fs8TCqdpMPs-LQNSN05r2AG3zSYAOyDWJuckzz6s",
+           "auth":"OgxebpQEu3j0eraIvYldXw"
+        }
+     
+    };
 
     // Extrai os parâmetros do req.body
     const { icon, title, body, imageUrl } = request.body;
