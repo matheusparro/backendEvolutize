@@ -12,5 +12,7 @@ datasource db {
 model User {
   id    Int     @id @default(autoincrement())
   name String
-  vapid_id  String
+  p256dh String
+  endpoint String
+  auth String
 }
