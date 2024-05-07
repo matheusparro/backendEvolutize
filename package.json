@@ -5,8 +5,9 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "migrate:deploy": "prisma migrate deploy",
+    "build": "prisma migrate deploy && prisma generate && npm run generate && tsc"
   },
   "author": "matheus.parro",
   "license": "ISC",
