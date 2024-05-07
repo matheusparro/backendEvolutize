@@ -46,6 +46,10 @@ app.get('/', (request, response) => {
 app.post('/notification/push/register', async (request, response) => {
   try {
     const { subscription } = request.body as ISubscription;
+    const findUser = await prisma.user.findFirst({ where: { endpoint: subscription.endpoint } });
+    if (findUser) {
+      return response.status(409).json({ error: "Usuário já registrado." });
+    }
     await prisma.user.create({
       data: {
         endpoint: subscription.endpoint,
