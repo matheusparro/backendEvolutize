@@ -96,4 +96,4 @@ app.post('/notification/push/send', async (request: Request<{}, {}, IPushMessage
 });
 
 
-app.listen(3333, () => console.log('SERVER IS RUNNING AT :3333'));
+app.listen(process.env.PORT || 3333);
