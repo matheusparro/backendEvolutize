@@ -32,8 +32,8 @@ app.use(cors());
 // WebPush
 const publicKey = 'BBsXYqVS8EFi29zDPFD_uFUg11oaKBowNRqk-O-WqP3cmzzQOuSyCTUGUsStGtZFKEz8f2XYEx-mDawfhCg4hAM'
 const privateKey = 'akUfQDG1egwhDbLFzg__48BYOSuV9kti4upgRKGX8KU'
-//webPush.setVapidDetails('https://backendevolutize.onrender.com', publicKey, privateKey);
-webPush.setVapidDetails('https://localhost:3333', publicKey, privateKey);
+webPush.setVapidDetails('https://backendevolutize.onrender.com', publicKey, privateKey);
+//webPush.setVapidDetails('https://localhost:3333', publicKey, privateKey);
 
 app.get('/notification/push/public_key', (request, response) => {
   return response.json({ publicKey });
