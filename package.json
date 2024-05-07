@@ -9,7 +9,7 @@
       "start": "node src/server.ts",
       "migrate:deploy": "prisma migrate deploy",
       "build": "npm run prisma:install && prisma generate && prisma migrate deploy && tsc",
-      "start:prod": "node dist/server.js",
+      "start:prod": "node server.js",
       "start:migrate:prod": "npm run prisma:install && npm run migrate:deploy && npm run start:prod",
       "prisma:generate": "prisma generate",
       "prisma:install": "npm install prisma -D",
