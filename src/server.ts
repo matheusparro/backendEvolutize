@@ -123,11 +123,14 @@ app.post('/notification/push/send', async (request: Request<{}, {}, IPushMessage
         }));
 
         // Verificar se a resposta indica que a inscrição expirou
-        if (notificationSend.body.includes("expired")) {
+        if (notificationSend.body.includes("unsubscribed") || notificationSend.body.includes("expired")) {
           await prisma.user.delete({ where: { id: user.id } });
         }
-      } catch (error) {
+      } catch (error:any) {
         console.error("Erro ao enviar notificação push para o usuário:", user.id, error);
+        if (error.body.includes("unsubscribed") || error.body.includes("expired")) {
+          await prisma.user.delete({ where: { id: user.id } });
+        }
       }
     }
     
