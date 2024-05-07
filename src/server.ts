@@ -40,7 +40,7 @@ app.get('/notification/push/public_key', (request, response) => {
 });
 
 app.get('/', (request, response) => {
-  return response.send("TESTE");
+  return response.send("TESTETESTETETETET");
 });
 
 app.post('/notification/push/register', async (request, response) => {
