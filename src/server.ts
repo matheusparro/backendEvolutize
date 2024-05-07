@@ -63,6 +63,43 @@ app.post('/notification/push/register', async (request, response) => {
 });
 
 // Rota para enviar uma notificação push
+// app.post('/notification/push/send', async (request: Request<{}, {}, IPushMessage>, response: Response) => {
+//   try {
+//     const message = request.body;
+//     const users = await prisma.user.findMany();
+    
+//     for (const user of users) {
+//       let subscription: ISubscription['subscription'] = {
+//         endpoint: user.endpoint,
+//         keys: {
+//           auth: user.auth,
+//           p256dh: user.p256dh
+//         }
+//       };
+
+//       try {
+//         const notificationSend =  webPush.sendNotification(subscription, JSON.stringify({
+//           icon: message.icon,
+//           title: message.title,
+//           body: message.body,
+//           imageUrl: message.imageUrl
+//         }));
+//         if((await notificationSend).body.includes("expired")) {
+//           await prisma.user.delete({ where: { id: user.id } });
+//         }
+//       } catch (error) {
+//         console.error("Erro ao enviar notificação push para o usuário:", user.id, error);
+//         continue;
+//       }
+//     }
+//     return response.sendStatus(201);
+//   } catch (error) {
+//     console.error("Erro ao enviar notificação push:", error);
+//     return response.status(500).json({ error: "Erro ao enviar notificação push." });
+//   }
+// }); MEU POST
+
+// Rota para enviar uma notificação push
 app.post('/notification/push/send', async (request: Request<{}, {}, IPushMessage>, response: Response) => {
   try {
     const message = request.body;
@@ -78,22 +115,29 @@ app.post('/notification/push/send', async (request: Request<{}, {}, IPushMessage
       };
 
       try {
-        const notificationSend =  webPush.sendNotification(subscription, JSON.stringify({
+        const notificationSend = await webPush.sendNotification(subscription, JSON.stringify({
           icon: message.icon,
           title: message.title,
           body: message.body,
           imageUrl: message.imageUrl
         }));
+
+        // Verificar se a resposta indica que a inscrição expirou
+        if (notificationSend.body.includes("expired")) {
+          await prisma.user.delete({ where: { id: user.id } });
+        }
       } catch (error) {
         console.error("Erro ao enviar notificação push para o usuário:", user.id, error);
       }
     }
+    
     return response.sendStatus(201);
   } catch (error) {
     console.error("Erro ao enviar notificação push:", error);
     return response.status(500).json({ error: "Erro ao enviar notificação push." });
   }
 });
+
 
 
 app.listen(3333);
