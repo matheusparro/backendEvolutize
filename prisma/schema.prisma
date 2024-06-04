@@ -10,11 +10,100 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  name String
-  p256dh String
-  endpoint String
-  auth String
+
+model TEC_ENDPOINT {
+  TEC_EndpointId    Int     @id @default(autoincrement())
+  TEC_EndpointName String
+  TEC_EndpointP256dh String
+  TEC_EndpointEndpoint String
+  TEC_EndpointAuth String
+  CreatedAt DateTime @default(now())
+  UpdatedAt DateTime @updatedAt
+  USU_USUARIOENDPOINT   USU_USUARIOENDPOINT[]
+  Eliminar Boolean @default(false)
 }
 
+model TEC_PARAMETRO {
+  TEC_ParametroCodigoCliente Int @id
+  TEC_ParametroNomeCliente   String
+  TEC_PARAMETROBASEPLICACAO   TEC_PARAMETROBASEPLICACAO[]
+  TEC_CANAL TEC_CANAL[]
+  USU_USUARIO USU_USUARIO[]
+  CreatedAt DateTime @default(now())
+  UpdatedAt DateTime @updatedAt
+  Eliminar Boolean @default(false)
+}
+
+model TEC_BASEAPLICACAO {
+  TEC_BaseAplicacaoId Int @id
+  TEC_BaseAplicacaoNome String
+  TEC_PARAMETROBASEPLICACAO   TEC_PARAMETROBASEPLICACAO[]
+  TEC_CANAL TEC_CANAL[]
+  USU_USUARIO USU_USUARIO[]
+  CreatedAt DateTime @default(now())
+  UpdatedAt DateTime @updatedAt
+  Eliminar Boolean @default(false)
+}
+
+model TEC_PARAMETROBASEPLICACAO {
+  TEC_ParametroCodigoCliente Int
+  TEC_BaseAplicacaoId        Int
+  TEC_Parametro               TEC_PARAMETRO  @relation(fields: [TEC_ParametroCodigoCliente], references: [TEC_ParametroCodigoCliente] ,onDelete: Cascade)
+  TEC_BaseAplicacao           TEC_BASEAPLICACAO  @relation(fields: [TEC_BaseAplicacaoId], references: [TEC_BaseAplicacaoId],onDelete: Cascade)
+  @@id([TEC_ParametroCodigoCliente, TEC_BaseAplicacaoId])
+  CreatedAt DateTime @default(now())
+  UpdatedAt DateTime @updatedAt
+  Eliminar Boolean @default(false)
+}
+
+model TEC_CANAL {
+  TEC_CanalId Int @id @default(autoincrement())
+  TEC_CanalNome String
+  TEC_ParametroCodigoCliente Int
+  TEC_BaseAplicacaoId Int
+  TEC_Parametro TEC_PARAMETRO  @relation(fields: [TEC_ParametroCodigoCliente], references: [TEC_ParametroCodigoCliente],onDelete: Cascade) // VER NULLABLE
+  TEC_BaseAplicacao TEC_BASEAPLICACAO  @relation(fields: [TEC_BaseAplicacaoId], references: [TEC_BaseAplicacaoId],onDelete: Cascade)
+  CreatedAt DateTime @default(now())
+  UpdatedAt DateTime @updatedAt
+  USU_USUARIOCANAL   USU_USUARIOCANAL[]
+  Eliminar Boolean @default(false)
+}
+
+model USU_USUARIO {
+  USU_UsuarioId Int @id @default(autoincrement())
+  USU_UsuarioTipo String
+  USU_UsuarioNome String
+  USU_UsuarioChave String
+  TEC_ParametroCodigoCliente Int
+  TEC_BaseAplicacaoId Int
+  TEC_Parametro TEC_PARAMETRO  @relation(fields: [TEC_ParametroCodigoCliente], references: [TEC_ParametroCodigoCliente],onDelete: Cascade)
+  TEC_BaseAplicacao TEC_BASEAPLICACAO  @relation(fields: [TEC_BaseAplicacaoId], references: [TEC_BaseAplicacaoId],onDelete: Cascade)
+  CreatedAt DateTime @default(now())
+  UpdatedAt DateTime @updatedAt
+  USU_USUARIOCANAL   USU_USUARIOCANAL[]
+  USU_USUARIOENDPOINT   USU_USUARIOENDPOINT[]
+  Eliminar Boolean @default(false)
+  
+}
+
+model USU_USUARIOCANAL {
+  USU_UsuarioId Int
+  TEC_CanalId Int
+  USU_Usuario USU_USUARIO @relation(fields: [USU_UsuarioId], references: [USU_UsuarioId],onDelete: Cascade)
+  TEC_Canal TEC_CANAL @relation(fields: [TEC_CanalId], references: [TEC_CanalId],onDelete: Cascade)
+  @@id([USU_UsuarioId, TEC_CanalId])
+  CreatedAt DateTime @default(now())
+  UpdatedAt DateTime @updatedAt
+  Eliminar Boolean @default(false)
+}
+
+model USU_USUARIOENDPOINT {
+  USU_UsuarioId Int
+  TEC_EndpointId Int
+  USU_Usuario USU_USUARIO @relation(fields: [USU_UsuarioId], references: [USU_UsuarioId],onDelete: Cascade)
+  TEC_Endpoint TEC_ENDPOINT @relation(fields: [TEC_EndpointId], references: [TEC_EndpointId],onDelete: Cascade)
+  @@id([USU_UsuarioId, TEC_EndpointId])
+  CreatedAt DateTime @default(now())
+  UpdatedAt DateTime @updatedAt
+  Eliminar Boolean @default(false)
+}

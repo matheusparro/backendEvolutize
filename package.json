@@ -3,38 +3,52 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/server.js",
-
-    "scripts": {
-      "dev": "tsc --watch",
-      "start": "node src/server.ts",
-      "migrate:deploy": "prisma migrate deploy",
-      "build": "npm run prisma:install && prisma generate && prisma migrate deploy && tsc",
-      "start:prod": "node src/server.js",
-      "start:migrate:prod": "npm run prisma:install && npm run migrate:deploy && npm run start:prod",
-      "prisma:generate": "prisma generate",
-      "prisma:install": "npm install prisma -D",
-      "postinstall": "npx prisma generate"
-    
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon",
+    "start": "node src/server.ts",
+    "migrate:deploy": "prisma migrate deploy",
+    "build": "npm run prisma:install && prisma generate && prisma migrate deploy && tsc",
+    "start:prod": "node src/server.js",
+    "start:migrate:prod": "npm run prisma:install && npm run migrate:deploy && npm run start:prod",
+    "prisma:generate": "prisma generate",
+    "prisma:install": "npm install prisma -D",
+    "postinstall": "npx prisma generate"
   },
-  
+  "nodemonConfig": {
+    "watch": [
+      "src"
+    ],
+    "ext": "ts",
+    "exec": "tsx src/server.ts"
+  },
   "author": "matheus.parro",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "5.12.1",
     "@types/axios": "0.14.0",
     "axios": "1.6.8",
+    "cls-hooked": "^4.2.2",
     "cors": "2.8.5",
     "dotenv": "16.4.5",
     "express": "4.19.2",
+    "morgan": "^1.10.0",
+    "swagger-ui-express": "^5.0.0",
+    "tsoa": "^6.2.1",
     "web-push": "3.6.7"
   },
   "devDependencies": {
+    "@types/cls-hooked": "^4.3.8",
     "@types/cors": "2.8.17",
     "@types/express": "4.17.21",
+    "@types/morgan": "^1.9.9",
     "@types/node": "20.12.7",
+    "@types/swagger-ui-express": "^4.1.6",
     "@types/web-push": "3.6.3",
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
     "tsx": "4.7.2",
     "typescript": "5.4.5"
-  } 
-    
+  }
 }
