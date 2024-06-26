@@ -3,13 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "main": "src/server.js",
+  "type": "module",
   "scripts": {
     "dev": "nodemon",
     "start": "node src/server.ts",
-    "build": "npm run prisma:generate && tsc",
-    "start:prod": "node dist/server.js",
+    "migrate:deploy": "prisma migrate deploy",
+    "build": "npm run prisma:install && prisma generate && prisma migrate deploy && tsc",
+    "start:prod": "node src/server.js",
+    "start:migrate:prod": "npm run prisma:install && npm run migrate:deploy && npm run start:prod",
     "prisma:generate": "prisma generate",
-    "prisma:install": "npm install prisma -D"
+    "prisma:install": "npm install prisma -D",
+    "postinstall": "npx prisma generate"
   },
   "nodemonConfig": {
     "watch": [

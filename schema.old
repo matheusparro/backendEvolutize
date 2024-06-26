@@ -117,26 +117,35 @@ model WWP_Parameter {
 }
 
 model PSH_Endpoint {
-  PSH_EndpointId          Int       @id(map: "PK__PSH_Endp__CA17CA7C572F8777") @default(autoincrement())
-  PSH_EndpointAuth        String?   @db.NVarChar(600)
-  PSH_EndpointP256dh      String?   @db.NVarChar(600)
-  PSH_EndpointEndpoint    String?   @db.NVarChar(600)
-  PSH_EndpointCreatedAt   DateTime  @db.DateTime
-  PSH_EndpointUpdatedAt   DateTime  @db.DateTime
-  PSH_EndpointUltimoLogin DateTime? @db.DateTime
+  PSH_EndpointId        Int      @id(map: "PK__PSH_Endp__CA17CA7CC4DC22BC")
+  PSH_EndpointAuth      String   @db.NVarChar(600)
+  PSH_EndpointP256dh    String   @db.NVarChar(600)
+  PSH_EndpointEndpoint  String   @db.NVarChar(600)
+  PSH_EndpointCreatedAt DateTime @db.DateTime
+  PSH_EndpointUpdatedAt DateTime @db.DateTime
+}
+
+model PSH_NotificaoLog {
+  PSH_NotificaoLogId         Int      @id(map: "PK__PSH_Noti__386422C47C079403") @default(autoincrement())
+  PSH_NotificaoLogTitulo     String   @db.NVarChar(120)
+  PSH_NotificaoLogMensagem   String   @db.NVarChar(Max)
+  PSH_NotificaoLogData       String   @db.NVarChar(Max)
+  PSH_NotificaoLogStatus     String   @db.NVarChar(40)
+  PSH_NotificaoLogUsuarioId  Int
+  PSH_NotificaoLogEndpointId Int
+  PSH_NotificacaoCreatedAt   DateTime @db.DateTime
+  PSH_NotificacaoUpdatedAt   DateTime @db.DateTime
 }
 
 model PSH_Usuario {
-  PSH_UsuarioId        Int      @id(map: "PK__PSH_Usua__4717C387DC5A5365") @default(autoincrement())
+  PSH_UsuarioId Int @id @default(autoincrement())
   PSH_UsuarioNome      String   @db.NVarChar(60)
   PSH_UsuarioChave     String   @db.NChar(128)
   TEC_ClienteCodigo    Decimal  @db.Decimal(14, 0)
   PSH_UsuarioCreatedAt DateTime @db.DateTime
   PSH_UsuarioUpdatedAt DateTime @db.DateTime
-  TEC_AplicacaoId      Int
-  PSH_UsuarioTipo      String   @db.NChar(128)
 
-  @@index([TEC_ClienteCodigo, TEC_AplicacaoId], map: "IPSH_USUARIO1")
+  @@index([TEC_ClienteCodigo], map: "IPSH_USUARIO1")
 }
 
 model PSH_UsuarioEndpoint {
@@ -147,43 +156,4 @@ model PSH_UsuarioEndpoint {
 
   @@id([PSH_EndpointId, PSH_UsuarioId], map: "PK__PSH_Usua__AE66B644A0E524DD")
   @@index([PSH_UsuarioId], map: "IPSH_USUARIOENDPOINT1")
-}
-
-model PSH_NotificacaoLogUsuario {
-  PSH_NotificacaoLogId           Int
-  PSH_NotificacaoLogUsuarioId    Int
-  PSH_NotificacaoLogUsuarioStatu String   @db.NChar(1)
-  PSH_NotificacaoLogUsuarioMensa String   @db.NVarChar(Max)
-  PSH_NotificacaoLogUsuarioCreat DateTime @db.DateTime
-
-  @@id([PSH_NotificacaoLogId, PSH_NotificacaoLogUsuarioId], map: "PK__PSH_Noti__FD4D7585530998B7")
-}
-
-model TEC_Aplicacao {
-  TEC_AplicacaoId   Int    @id(map: "PK__TEC_Apli__42C9A7A42189196A") @default(autoincrement())
-  TEC_AplicacaoNome String @db.NVarChar(60)
-}
-
-model TEC_ClienteAplicacao {
-  TEC_ClienteCodigo Decimal @db.Decimal(14, 0)
-  TEC_AplicacaoId   Int
-
-  @@id([TEC_ClienteCodigo, TEC_AplicacaoId], map: "PK__TEC_Clie__26A4CE703C4A9F21")
-  @@index([TEC_AplicacaoId], map: "ITEC_CLIENTEAPLICACAO1")
-}
-
-model PSH_NotificacaoLog {
-  PSH_NotificacaoLogId        Int      @id(map: "PK__PSH_Noti__8581195A6AECCB1D") @default(autoincrement())
-  PSH_NotificacaoLogIcon      String   @db.NVarChar(999)
-  PSH_NotificacaoLogTitle     String   @db.NVarChar(250)
-  PSH_NotificacaoLogBody      String   @db.NVarChar(999)
-  PSH_NotificacaoLogUrl       String   @db.NVarChar(999)
-  PSH_NotificacaoLogStatus    String   @db.NChar(1)
-  TEC_ClienteCodigo           Decimal  @db.Decimal(14, 0)
-  TEC_AplicacaoId             Int
-  PSH_NotificacaoLogCreatedAt DateTime @db.DateTime
-  PSH_NotificacaoLogUpdatedAt DateTime @db.DateTime
-  PSH_NotificacaoLogMsg       String?  @db.NVarChar(999)
-
-  @@index([TEC_ClienteCodigo, TEC_AplicacaoId], map: "IPSH_NOTIFICACAOLOG1")
 }

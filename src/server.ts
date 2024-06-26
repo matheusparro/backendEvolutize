@@ -3,23 +3,21 @@ import cors from 'cors';
 import webPush from 'web-push';
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
-import USU_UsuarioService from './services/USU_Usuario.service';
-import * as cls from 'cls-hooked';
-import { PrismaTransactionScope } from './dataBase/PrismaTransactionScope';
-import { PrismaClientManager } from './dataBase/PrismaClientManager';
-import TEC_CanalRouter from './routes/TEC_Canal.routes';
-import TEC_RegisterNotificationRouter from './routes/TEC_RegisterNotification.router';
-import TEC_NotificationSyncRouter from './routes/TEC_NotificacaoSync.routes';
-import USU_UsuarioCanalRouter from './routes/USU_UsuarioCanal.routes';
-import TEC_EndpointRouter from './routes/TEC_Endpoint.routes';
+import PSH_RegisterNotificationRouter from './routes/PSH_RegisterNotificationRouter';
+import PSH_EndpointRouter from './routes/PSH_EndpointRouter';
+import PSH_NotificationLogService from './services/PSH_NotificationLogService';
+
 // Interface para os dados da mensagem
 interface IPushMessage {
-  icon: string;
-  title: string;
-  body: string;
-  imageUrl: string;
-  TEC_CanalId: number;
-  tec_canaisId: number[];
+  message:{
+    icon: string,
+    title: string,
+    body: string,
+    url: string,
+  }
+  users: string[]
+  TEC_ClienteCodigo:string,
+  TEC_AplicacaoId: number
 }
 export interface ISubscription {
 
@@ -41,12 +39,6 @@ const publicKey = 'BBsXYqVS8EFi29zDPFD_uFUg11oaKBowNRqk-O-WqP3cmzzQOuSyCTUGUsStG
 const privateKey = 'akUfQDG1egwhDbLFzg__48BYOSuV9kti4upgRKGX8KU'
 //webPush.setVapidDetails('https://backendevolutize.onrender.com', publicKey, privateKey);
 webPush.setVapidDetails('https://localhost:3333', publicKey, privateKey);
-
-const transactionContext = cls.createNamespace('transaction');
-const transactionScope = new PrismaTransactionScope(prisma, transactionContext);
-const clientManager = new PrismaClientManager(prisma, transactionContext);
-
-const usu_usuarioService = new USU_UsuarioService(transactionScope,clientManager);
 
 
 const checkServerStatusMiddleware = async (request: Request, response: Response, next: NextFunction) => {
@@ -71,129 +63,189 @@ app.get('/notification/push/public_key', (request, response) => {
   return response.json({ publicKey });
 });
 
-app.get('/', (request, response) => {
-  return response.send("TESTETESTETETETET");
+app.get('/',async (request, response) => {
+  const teste = await prisma.uSU_Usuario.findMany();
+
+  //retornar o teste em formato de json com status 200
+  return response.status(200).json(teste);
+  //
 });
 
-// Rota para enviar uma notificação push
-app.post('/notification/push/send/old', async (request: Request<{}, {}, IPushMessage>, response: Response) => {
+// let logNotificacao = await prisma.pSH_NotificacaoLog.create({
+//   data: {
+//     PSH_NotificacaoLogCreatedAt: new Date(),
+//   PSH_NotificacaoLogBody: notificationPayload,
+//   PSH_NotificacaoLogIcon: body.message.icon,
+//   PSH_NotificacaoLogStatus: 'S',
+//   PSH_NotificacaoLogTitle: body.message.title,
+//   PSH_NotificacaoLogUpdatedAt: new Date(),
+//   PSH_NotificacaoLogUrl: body.message.url,
+//   TEC_AplicacaoId: body.TEC_AplicacaoId,
+//   TEC_ClienteCodigo : body.TEC_ClienteCodigo
+//   },  
+// });
+
+// create a method tthat do this and return log
+const psh_logService = new PSH_NotificationLogService(); 
+
+async function sendNotifications(users: string[], body: IPushMessage) {
   try {
-    const message = request.body;
-    let { tec_canaisId }: { tec_canaisId: number[] } = request.body;
-     tec_canaisId = message.tec_canaisId.map(number => Number(number));
-    
-    const usersByCanal = await usu_usuarioService.getAllUsersByCanal(tec_canaisId);
-    
-    if (!usersByCanal || usersByCanal.length === 0) {
-      return response.status(403).json({ error: "Nenhum usuário encontrado nos canais fornecidos." });
-    }
-    for(let index = 0; index < 700; index++){
-    for (const user of usersByCanal) {
-      const subscription: ISubscription = {
-        endpoint: user.TEC_EndpointEndpoint,
-        keys: {
-          auth: user.TEC_EndpointAuth,
-          p256dh: user.TEC_EndpointP256dh
-        }
-      };
-      
-      try {
-        const notificationSend = await webPush.sendNotification(subscription, JSON.stringify({
-          icon: message.icon,
-          title: message.title,
-          body: message.body,
-          imageUrl: message.imageUrl
-        }));
-        
-        if (notificationSend.body.includes("unsubscribed") || notificationSend.body.includes("expired")) {
-          await prisma.uSU_USUARIO.delete({ where: { USU_UsuarioId: user.USU_UsuarioId } });
-        }
-      } catch (error:any) {
-        console.error("Erro ao enviar notificação push:", error);
-        if (error.body.includes("unsubscribed") || error.body.includes("expired")) {
-          await prisma.tEC_ENDPOINT.delete({ where: { TEC_EndpointId: user.TEC_EndpointId } });
+    const usersFound = await prisma.pSH_Usuario.findMany({
+      where: {
+        PSH_UsuarioChave: {
+          in: users,
+        },
+      },
+    });
+
+    const endpointsUsers = await prisma.pSH_UsuarioEndpoint.findMany({
+      where: {
+        PSH_UsuarioId: {
+          in: usersFound.map(user => user.PSH_UsuarioId),
+        },
+      },
+    });
+
+    const notificationPayload = JSON.stringify({
+      icon: body.message.icon,
+      title: body.message.title,
+      body: body.message.body,
+      url: body.message.url,
+    });
+    if(endpointsUsers.length != 0) {
+      let logNotificacao = await prisma.pSH_NotificacaoLog.create({
+          data: {
+            PSH_NotificacaoLogCreatedAt: new Date(),
+          PSH_NotificacaoLogBody: notificationPayload,
+          PSH_NotificacaoLogIcon: body.message.icon,
+          PSH_NotificacaoLogStatus: 'S',
+          PSH_NotificacaoLogTitle: body.message.title,
+          PSH_NotificacaoLogUpdatedAt: new Date(),
+          PSH_NotificacaoLogUrl: body.message.url,
+          TEC_AplicacaoId: body.TEC_AplicacaoId,
+          TEC_ClienteCodigo : body.TEC_ClienteCodigo
+          },  
+      });
+  
+      for (const endpointUser of endpointsUsers) {
+        try {
+          const endpoint = await prisma.pSH_Endpoint.findFirst({
+            where: {
+              PSH_EndpointId: endpointUser.PSH_EndpointId,
+              NOT: [
+                { PSH_EndpointAuth: null },
+                { PSH_EndpointAuth: "" },
+              ],
+            },
+          });
+
+          if (!endpoint) {
+            continue;
+          }
+
+          interface ISubscription {
+            endpoint: string;
+            keys: {
+              auth: string;
+              p256dh: string;
+            };
+          }
+
+          const subscription: ISubscription = {
+            endpoint: endpoint.PSH_EndpointEndpoint as string,
+            keys: {
+              auth: endpoint.PSH_EndpointAuth as string,
+              p256dh: endpoint.PSH_EndpointP256dh as string,
+            },
+          };
+
+          const notificationSend = await webPush.sendNotification(subscription, notificationPayload);
+
+          if (notificationSend.body.includes('unsubscribed') || notificationSend.body.includes('expired')) {
+            await prisma.$transaction(async (prismaTr) => {
+              await prismaTr.pSH_Endpoint.delete({ where: { PSH_EndpointId: endpoint.PSH_EndpointId } });
+              const whereUniqueInput = {
+                PSH_EndpointId_PSH_UsuarioId: {
+                  PSH_EndpointId: endpointUser.PSH_EndpointId,
+                  PSH_UsuarioId: endpointUser.PSH_UsuarioId,
+                },
+              };
+              await prismaTr.pSH_UsuarioEndpoint.delete({
+                where: whereUniqueInput,
+              });
+
+            });
+            await prisma.pSH_NotificacaoLogUsuario.create({
+              data: {
+                PSH_NotificacaoLogId: logNotificacao.PSH_NotificacaoLogId, 
+                PSH_NotificacaoLogUsuarioMensa: 'Usuário cancelou a inscrição na notificação no navegador',
+                PSH_NotificacaoLogUsuarioStatu:'E',
+                PSH_NotificacaoLogUsuarioId: endpointUser.PSH_UsuarioId,
+                PSH_NotificacaoLogUsuarioCreat: new Date(),
+              },
+            });
+          }
+          await prisma.pSH_NotificacaoLogUsuario.create({
+            data: {
+              PSH_NotificacaoLogId: logNotificacao.PSH_NotificacaoLogId, 
+              PSH_NotificacaoLogUsuarioMensa: 'Notificação Enviada com Sucesso',
+              PSH_NotificacaoLogUsuarioStatu:'S',
+              PSH_NotificacaoLogUsuarioId: endpointUser.PSH_UsuarioId,
+              PSH_NotificacaoLogUsuarioCreat: new Date(),
+            },
+          });
+        } catch (error: any) {
+          if (error.body?.includes("unsubscribed") || error.body?.includes("expired")) {
+            await prisma.pSH_Endpoint.delete({ where: { PSH_EndpointId: endpointUser.PSH_EndpointId } });
+            const whereUniqueInput = {
+              PSH_EndpointId_PSH_UsuarioId: {
+                PSH_EndpointId: endpointUser.PSH_EndpointId,
+                PSH_UsuarioId: endpointUser.PSH_UsuarioId,
+              },
+            };
+            await prisma.pSH_UsuarioEndpoint.delete({
+              where: whereUniqueInput,
+            });
+
+            // Crie um registro de log de usuário para indicar que houve um erro ao enviar a notificação push
+            await prisma.pSH_NotificacaoLogUsuario.create({
+              data: {
+                PSH_NotificacaoLogId: logNotificacao.PSH_NotificacaoLogId, 
+                PSH_NotificacaoLogUsuarioMensa: error.message,
+                PSH_NotificacaoLogUsuarioStatu:'E',
+                PSH_NotificacaoLogUsuarioId: endpointUser.PSH_UsuarioId,
+                PSH_NotificacaoLogUsuarioCreat: new Date(),
+              },
+            });
+          }
         }
       }
     }
-  }
-    return response.sendStatus(201);
   } catch (error) {
-    console.error("Erro ao enviar notificação push:", error);
-    return response.status(500).json({ error: "Erro ao enviar notificação push." });
+    console.error("Erro ao enviar notificações push:", error);
   }
-});
-
+}
 
 app.post('/notification/push/send', async (request: Request<{}, {}, IPushMessage>, response: Response) => {
-  try {
-    const message = request.body;
-    let { tec_canaisId }: { tec_canaisId: number[] } = request.body;
-    tec_canaisId = message.tec_canaisId.map(number => Number(number));
+  const { users, TEC_ClienteCodigo, TEC_AplicacaoId, message } = request.body;
 
-    const usersByCanal = await usu_usuarioService.getAllUsersByCanal(tec_canaisId);
-
-    if (!usersByCanal || usersByCanal.length === 0) {
-      return response.status(403).json({ error: "Nenhum usuário encontrado nos canais fornecidos." });
-    }
-
-    // Definição da função sendNotifications
-    const sendNotifications = async () => {
-      // for (let index = 0; index < 10000; index++) {
-        const notificationPromises = usersByCanal.map(async (user: any) => {
-          const subscription: ISubscription = {
-            endpoint: user.TEC_EndpointEndpoint,
-            keys: {
-              auth: user.TEC_EndpointAuth,
-              p256dh: user.TEC_EndpointP256dh
-            }
-          };
-
-          try {
-            if (index === 2 || index === 4) {
-              throw new Error("Erro ao enviar notificação push");
-            }
-
-            const notificationSend = await webPush.sendNotification(subscription, JSON.stringify({
-              icon: message.icon,
-              title: message.title,
-              body: message.body,
-              imageUrl: message.imageUrl,
-            }));
-
-            if (notificationSend.body.includes("unsubscribed") || notificationSend.body.includes("expired")) {
-              await prisma.uSU_USUARIO.delete({ where: { USU_UsuarioId: user.USU_UsuarioId } });
-            }
-          } catch (error: any) {
-            console.error("Erro ao enviar notificação push:", error);
-            if (error.body?.includes("unsubscribed") || error.body?.includes("expired")) {
-              await prisma.tEC_ENDPOINT.delete({ where: { TEC_EndpointId: user.TEC_EndpointId } });
-            }
-            // Continue to the next user even if an error occurs
-          }
-        });
-
-        await Promise.all(notificationPromises.map(p => p.catch(e => e)));
-      // }
-    };
-
-    // Inicia o envio de notificações de forma assíncrona sem aguardar
-    sendNotifications().catch(error => {
-      console.error("Erro ao enviar notificações:", error);
-    });
-
-    return response.sendStatus(200); // Retorna imediatamente ao cliente
-  } catch (error) {
-    console.error("Erro ao enviar notificação push:", error);
-    return response.status(500).json({ error: "Erro ao enviar notificação push." });
+  // Validação dos parâmetros da requisição
+  if (!users || !TEC_ClienteCodigo || !TEC_AplicacaoId || !message) {
+    return response.status(400).json({ error: 'Todos os parâmetros são obrigatórios: users, TEC_ClienteCodigo, TEC_AplicacaoId, message' });
   }
+
+  // Dispara o processamento em background
+  sendNotifications(users, request.body).catch((error) => {
+    console.error("Erro ao processar notificações em background:", error);
+  });
+
+  // Retorna a resposta imediatamente
+  return response.sendStatus(200);
 });
 
 
-app.use(TEC_CanalRouter);
-app.use(TEC_RegisterNotificationRouter)
-app.use(TEC_NotificationSyncRouter)
-app.use(USU_UsuarioCanalRouter)
-app.use(TEC_EndpointRouter)
+app.use(PSH_RegisterNotificationRouter)
+app.use(PSH_EndpointRouter)
 // Rota para verificar se o servidor e o banco de dados estão online
 app.get('/ping', async (request, response) => {
   try {

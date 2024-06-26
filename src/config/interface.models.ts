@@ -36,42 +36,41 @@ export interface TEC_ENDPOINTDTO {
     Eliminar?: boolean
   }
   
-  // USU_USUARIO.ts
-  export interface USU_USUARIODTO {
-    USU_UsuarioTipo: string;
-    USU_UsuarioNome: string;
-    USU_UsuarioChave: string;
-    TEC_ParametroCodigoCliente: number;
-    TEC_BaseAplicacaoId: number;
+  // PSH_USUARIO.ts
+  export interface PSH_USUARIODTO {
+    PSH_UsuarioTipo: string;
+    PSH_UsuarioNome: string;
+    PSH_UsuarioChave: string;
+    TEC_ClienteCodigo: number;
+    TEC_AplicacaoID: number;
+  }
+  export interface PSH_USUARIODTO_ALL extends PSH_USUARIODTO {
+    PSH_USUARIOCANAL: PSH_USUARIOCANALDTO[];
+    PSH_USUARIOENDPOINT: PSH_USUARIOENDPOINTDTO_ALL[];
     Eliminar?: boolean
   }
-  export interface USU_USUARIODTO_ALL extends USU_USUARIODTO {
-    USU_USUARIOCANAL: USU_USUARIOCANALDTO[];
-    USU_USUARIOENDPOINT: USU_USUARIOENDPOINTDTO_ALL[];
-    Eliminar?: boolean
-  }
-  // USU_USUARIOCANAL.ts
-  export interface USU_USUARIOCANALDTO {
-    USU_UsuarioId: number;
+  // PSH_USUARIOCANAL.ts
+  export interface PSH_USUARIOCANALDTO {
+    PSH_UsuarioId: number;
     TEC_CanalId: number;
     Eliminar?: boolean
   }
 
-  export interface USU_USUARIOCANAL_ALLDTO {
-    USU_UsuarioId: number;
+  export interface PSH_USUARIOCANAL_ALLDTO {
+    PSH_UsuarioId: number;
     TEC_CanalId: number;
-    USU_Usuario: USU_USUARIODTO;
+    PSH_Usuario: PSH_USUARIODTO;
     TEC_Canal: TEC_CANALDTO;
     Eliminar?: boolean
   }
   
-  // USU_USUARIOENDPOINT.ts
-  export interface USU_USUARIOENDPOINTDTO {
-    USU_UsuarioId: number;
+  // PSH_USUARIOENDPOINT.ts
+  export interface PSH_USUARIOENDPOINTDTO {
+    PSH_UsuarioId: number;
     TEC_EndpointId: number;
     Eliminar?: boolean
   }
- export interface USU_USUARIOENDPOINTDTO_ALL extends USU_USUARIOENDPOINTDTO {
+ export interface PSH_USUARIOENDPOINTDTO_ALL extends PSH_USUARIOENDPOINTDTO {
     TEC_Endpoint: TEC_ENDPOINTDTO;
     Eliminar?: boolean
   }
