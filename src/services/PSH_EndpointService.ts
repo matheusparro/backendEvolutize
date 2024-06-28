@@ -1,27 +1,29 @@
 import { PrismaClient, PSH_Endpoint } from '@prisma/client';
-
+import AppError from '../errorException/AppError';
 export default class PSH_EndpointService {
+    private prismaClient: PrismaClient;
 
-    async getEndpointByEndpoint(endpoint:string): Promise<PSH_Endpoint |  null> {
+    constructor() {
+        this.prismaClient = new PrismaClient();
+    }
+
+    async getEndpointByEndpoint(endpoint: string): Promise<PSH_Endpoint | null> {
         try {
-            const prismaClient = new PrismaClient();
-            const endpointFound = await prismaClient.pSH_Endpoint.findFirst({
+            const endpointFound = await this.prismaClient.pSH_Endpoint.findFirst({
                 where: {
                     PSH_EndpointEndpoint: endpoint,
                 }
             });
             return endpointFound;
         } catch (error: any) {
-            console.error('Erro ao criar endpoint:', error.message);
-            // Trate o erro de acordo com a necessidade da sua aplicação,
-            // como logá-lo, notificar o usuário, etc.
-            throw new Error('Falha ao criar endpoint.');
+            console.error('Erro ao buscar endpoint:', error.message);
+            throw new AppError(500, 'Falha ao buscar endpoint.', 'ENDPOINT_FETCH_ERROR');
         }
     }
+
     async updateEndpointLastLogin(endpointId: number): Promise<void> {
         try {
-            const prismaClient = new PrismaClient();
-            await prismaClient.pSH_Endpoint.update({
+            await this.prismaClient.pSH_Endpoint.update({
                 where: {
                     PSH_EndpointId: endpointId,
                 },
@@ -31,10 +33,7 @@ export default class PSH_EndpointService {
             });
         } catch (error: any) {
             console.error('Erro ao atualizar último login:', error.message);
-            // Trate o erro de acordo com a necessidade da sua aplicação,
-            // como logá-lo, notificar o usuário, etc.
-            throw new Error('Falha ao atualizar último login.');
+            throw new AppError(500, 'Falha ao atualizar último login.', 'LAST_LOGIN_UPDATE_ERROR');
         }
     }
-    
 }

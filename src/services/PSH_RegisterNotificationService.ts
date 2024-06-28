@@ -1,7 +1,7 @@
+import { ISubscription } from '../commonInterfaces/interfaces';
 import { PSH_USUARIODTO } from '../config/interface.models';
 import { PrismaClient } from '@prisma/client';
-import { ISubscription } from '../server';
-
+import AppError from '../errorException/AppError';
 
 export default class PSH_RegisterNotificationService {
 
@@ -16,7 +16,7 @@ export default class PSH_RegisterNotificationService {
                     }
                 });
                 if(!clienteAplicacao){
-                    throw new Error('Cliente/Aplicação não encontrados.');
+                    throw new AppError(404, 'Cliente/Aplicação não encontrados.', 'CLIENT_APP_NOT_FOUND');
                 }
                 let newUser = await prisma.pSH_Usuario.findFirst({
                     where: {
@@ -136,7 +136,7 @@ export default class PSH_RegisterNotificationService {
                         });
                         
                         if (!endpointCreated) {
-                            throw new Error('Falha ao criar endpoint.');
+                            throw new AppError(500, 'Falha ao criar endpoint.', 'ENDPOINT_CREATION_FAILED');
                         }
     
                         const usuarioEndpoint = await prisma.pSH_UsuarioEndpoint.create({
@@ -149,13 +149,13 @@ export default class PSH_RegisterNotificationService {
                         });
     
                         if (!usuarioEndpoint) {
-                            throw new Error('Falha ao criar endpoint.');
+                            throw new AppError(500, 'Falha ao criar usuário endpoint.', 'USER_ENDPOINT_CREATION_FAILED');
                         }
                     }
                 }
             });
         } catch (error: any) {
-            throw new Error(`Falha ao criar registrar usuário: ${error.message}`);
+            throw new AppError(500, `Falha ao registrar usuário: ${error.message}`, 'USER_REGISTRATION_FAILED');
         }
     }
     
