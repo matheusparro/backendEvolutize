@@ -17,5 +17,6 @@ export interface ISubscription {
     users: string[];
     TEC_ClienteCodigo: number;
     TEC_AplicacaoId: number;
+    hashExterno:string;
   }
   

@@ -7,8 +7,11 @@ export default class PSH_PermissaoNotificacao {
         this.prismaClient = new PrismaClient();
     }
 
-    async verify(TEC_ClienteCodigo: number, TEC_AplicacaoId: number): Promise<void> {
+    public async verify(TEC_ClienteCodigo: number, TEC_AplicacaoId: number): Promise<void> {
         try {
+            if (!TEC_ClienteCodigo || !TEC_AplicacaoId) {
+                throw new AppError(400, 'Cliente e Aplicação são obrigatórios.', 'CLIENT_APP_REQUIRED');
+            }
             const verify = await this.prismaClient.tEC_ClienteAplicacao.findFirst({
                 where: {
                     TEC_ClienteCodigo: TEC_ClienteCodigo,

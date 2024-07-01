@@ -17,14 +17,16 @@ const prisma = new PrismaClient();
 // Serviço para enviar notificações push
 export default class PSH_SendNotificationService {
   // Método para enviar notificações push para usuários específicos
-  async sendNotifications(users: string[], body: IPushMessage): Promise<void> {
+  async sendNotifications( body: IPushMessage): Promise<void> {
     try {
       // Busca os usuários com as chaves de notificação
       const usersFound = await prisma.pSH_Usuario.findMany({
         where: {
           PSH_UsuarioChave: {
-            in: users,
+            in: body.users,
           },
+          TEC_ClienteCodigo: body.TEC_ClienteCodigo,
+          TEC_AplicacaoId: body.TEC_AplicacaoId,
         },
       });
 
@@ -52,19 +54,21 @@ export default class PSH_SendNotificationService {
         const logNotificacao = await prisma.pSH_NotificacaoLog.create({
           data: {
             PSH_NotificacaoLogCreatedAt: new Date(),
-            PSH_NotificacaoLogBody: notificationPayload,
+            PSH_NotificacaoLogBody: body.message.body,
             PSH_NotificacaoLogIcon: body.message.icon,
             PSH_NotificacaoLogStatus: 'S',
             PSH_NotificacaoLogTitle: body.message.title,
             PSH_NotificacaoLogUpdatedAt: new Date(),
             PSH_NotificacaoLogUrl: body.message.url,
             PSH_NotificacaoLogImgUrl: body.message.imageUrl,
+            PSH_NotificacaoHashExterno: body.hashExterno ? body.hashExterno: "",
             TEC_AplicacaoId: body.TEC_AplicacaoId,
             TEC_ClienteCodigo: body.TEC_ClienteCodigo,
           },
         });
 
         // Itera sobre os endpoints de usuário para enviar notificações push
+        //for até 1000 
         for (const endpointUser of endpointsUsers) {
           try {
             // Busca o endpoint específico

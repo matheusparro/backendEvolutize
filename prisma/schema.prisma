@@ -185,6 +185,7 @@ model PSH_NotificacaoLog {
   PSH_NotificacaoLogUpdatedAt DateTime @db.DateTime
   PSH_NotificacaoLogMsg       String?  @db.NVarChar(999)
   PSH_NotificacaoLogImgUrl    String   @db.NVarChar(999)
+  PSH_NotificacaoHashExterno  String   @db.NVarChar(250)
 
   @@index([TEC_ClienteCodigo, TEC_AplicacaoId], map: "IPSH_NOTIFICACAOLOG1")
 }

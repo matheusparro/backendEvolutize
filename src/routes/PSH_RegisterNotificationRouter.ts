@@ -9,7 +9,7 @@ router.post('/notification/push/register', async (request: Request, response: Re
     await psh_registerNotificationController.registerNotification(request, response, next);
 
   } catch (error:any) {
-    
+    return next(error);
   }
 });
 

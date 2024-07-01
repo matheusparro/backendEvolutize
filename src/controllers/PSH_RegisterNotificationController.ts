@@ -17,6 +17,7 @@ export default class TEC_RegisterNotificationController {
     try {
       const subscription: ISubscription = req.body.subscription;
       const psh_usuario: PSH_USUARIODTO = req.body.psh_usuario;
+      await this.permissionService.verify(psh_usuario.TEC_ClienteCodigo, psh_usuario.TEC_AplicacaoID);
       if(!subscription || !psh_usuario){
         return next(new Error('Todos os parametros são obrigatórios: subscription, psh_usuario'));
       }
